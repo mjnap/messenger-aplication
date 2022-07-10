@@ -8,6 +8,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Client {
 
@@ -56,7 +57,7 @@ public class Client {
         }
     }
 
-    public String  getChats(){
+    public String getChats(){
         JSONArray jsonArray = new JSONArray();
         Set<String> otherUsers = relOfOther.keySet();
         for(String otherUser:otherUsers){
@@ -71,6 +72,24 @@ public class Client {
 
             jsonArray.add(jsonObject);
         }
+
+        return jsonArray.toString();
+    }
+
+    public String getMessages(String goalUser){
+        JSONArray jsonArray = new JSONArray();
+        List<JSONObject> massageList = relOfOther.get(goalUser).stream()
+                                                        .map(massage -> massage.getMassage())
+                                                        .collect(Collectors.toList());
+
+        List<Massage> massages = relOfOther.get(goalUser);
+        for(int i=0; i<massages.size(); i++)
+            if(massages.get(i).getStatus().equals(MassageStatus.UNSEEN))
+                massages.set(i, new Massage(massages.get(i).getMassage(), MassageStatus.SEEN));
+
+        relOfOther.put(goalUser, massages);
+
+        jsonArray.addAll(massageList);
 
         return jsonArray.toString();
     }

@@ -36,6 +36,9 @@ public class ConnectToClientThread extends WorkSpace implements Runnable {
                 else if(command.equals("get-chats")){
                     getChats();
                 }
+                else if(command.startsWith("get-messages")){
+                    getMessages(command);
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();

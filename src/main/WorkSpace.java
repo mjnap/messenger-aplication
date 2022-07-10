@@ -206,4 +206,15 @@ public class WorkSpace {
         output.writeUTF("OK" + res);
         output.flush();
     }
+
+    public void getMessages(String command) throws IOException {
+        String goalUser = command.split(" ")[1];
+        String res = clientList.stream()
+                            .filter(client -> client.getUserName().equals(userName))
+                            .collect(Collectors.toList()).get(0).getMessages(goalUser);
+
+
+        output.writeUTF("OK" + res);
+        output.flush();
+    }
 }
