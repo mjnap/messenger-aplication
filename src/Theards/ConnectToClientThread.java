@@ -16,11 +16,6 @@ public class ConnectToClientThread extends WorkSpace implements Runnable {
         this.command = command;
     }
 
-    //    public void set(Socket socket, String command){
-//        setSocket(socket);
-//        this.command = command;
-//    }
-
     @Override
     public void run() {
         try {

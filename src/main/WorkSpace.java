@@ -8,6 +8,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class WorkSpace {
 
@@ -31,17 +32,22 @@ public class WorkSpace {
         this.socket = socket;
         this.clientList = clientList;
     }
-    public WorkSpace() {}
 
     protected void close() throws IOException {
         socket.close();
         output.close();
         input.close();
+        Client thisClient = clientList.stream()
+                                    .filter(client -> client.getUserName().equals(userName))
+                                    .collect(Collectors.toList()).get(0);
+        thisClient.status = ClientStatus.OFFLINE;
+        for(int i=0; i<clientList.size(); i++)
+            if(clientList.get(i).equals(thisClient)) {
+                clientList.set(i, thisClient);
+                break;
+            }
+        /*********/System.out.println(thisClient);
     }
-
-//    protected void setSocket(Socket socket) {
-//        this.socket = socket;
-//    }
 
     /**
      * This method with the help of the central server, detect a client who wants
@@ -63,7 +69,6 @@ public class WorkSpace {
         while (tmpCommand.equals(""));
         detectClient = tmpCommand;
         tmpCommand = "";
-        /********/System.out.println(detectClient);
 
         if(detectClient.startsWith("OK")){
 
@@ -74,9 +79,11 @@ public class WorkSpace {
 
                 String userName = input.readUTF();
                 if(checkUserName(userName)){
-                    /********/System.out.println(clientList);
-                    clientList.add(new Client(userName, detectClient.split(" ")[1]));
-                    /********/System.out.println(clientList);
+                    Client newClient = new Client(userName, detectClient.split(" ")[1]);
+                    newClient.setConnection(socket);
+                    newClient.status = ClientStatus.ONLINE;
+                    clientList.add(newClient);
+                    this.userName = userName;
                     output.writeUTF("OK");
                     output.flush();
                 }
@@ -88,6 +95,18 @@ public class WorkSpace {
             else {
                 output.writeUTF("OK");
                 output.flush();
+
+                Client thisClient = clientList.stream()
+                                            .filter(client -> client.getPhoneNumber().equals(detectClient.split(" ")[1]))
+                                             .collect(Collectors.toList()).get(0);
+                this.userName = thisClient.getUserName();
+
+                thisClient.setConnection(socket);
+                thisClient.status = ClientStatus.ONLINE;
+                for(int i=0; i<clientList.size(); i++)
+                    if(clientList.get(i).equals(thisClient)){
+                        clientList.set(i, thisClient);
+                    }
             }
         }
         else {
@@ -121,11 +140,64 @@ public class WorkSpace {
         return chk;
     }
 
-    public void sendMassage(String command){
+    public void sendMassage(String command) throws IOException {
         String userOfReceiver = command.split(" ")[1],
-               JSON_massage = command.split(" ")[2];
+               JSON_massage = "{" + command.split("[{]")[1];
 
-        JSONObject jsonReceiver = (JSONObject) JSONValue.parse(JSON_massage);
+        // check whether there is a receiving user or not
+        if(isUserExist(userOfReceiver)){
+            // create right format JSON
+            JSONObject jsonReceiver = (JSONObject) JSONValue.parse(JSON_massage);
 
+            Client thisClient = clientList.stream()
+                    .filter(client -> client.getUserName().equals(userName))
+                    .collect(Collectors.toList()).get(0);
+
+            JSONObject newJSON = new JSONObject();
+            newJSON.put("seq", thisClient.getSeq(userOfReceiver)+1);
+            newJSON.put("form", userName);
+            newJSON.put("type", jsonReceiver.get("type"));
+            newJSON.put("body", jsonReceiver.get("body"));
+
+            // save massage for this client
+            thisClient.saveMassage(userOfReceiver, new Massage(newJSON, MassageStatus.SENDER));
+
+            // send seq to this client
+            output.writeUTF("OK " + thisClient.getSeq(userOfReceiver));
+            output.flush();
+
+            // send massage to other client if status was online
+            Client otherClient = clientList.stream()
+                    .filter(client -> client.getUserName().equals(userOfReceiver))
+                    .collect(Collectors.toList()).get(0);
+            /*********/System.out.println(userOfReceiver);
+            /*********/System.out.println(otherClient);
+            /*********/System.out.println(otherClient.status.equals(ClientStatus.ONLINE));
+            if(otherClient.status.equals(ClientStatus.ONLINE)){
+                otherClient.output.writeUTF("receive-message " + userName +" "+ newJSON);
+                otherClient.output.flush();
+
+                // save massage for other client
+                otherClient.saveMassage(userName, new Massage(newJSON, MassageStatus.SEEN));
+            }
+            else {
+                otherClient.saveMassage(userName, new Massage(newJSON, MassageStatus.UNSEEN));
+            }
+        }
+        else {
+            output.writeUTF("ERROR there is no receiving user");
+            output.flush();
+        }
+    }
+
+    private boolean isUserExist(String userName){
+        try{
+            boolean check = clientList.stream()
+                                    .map(client -> client.getUserName())
+                                    .anyMatch(name -> name.equals(userName));
+            return check;
+        }catch (NullPointerException e){
+            return false;
+        }
     }
 }
