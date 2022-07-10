@@ -1,5 +1,8 @@
 package main;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -51,6 +54,25 @@ public class Client {
         }catch (NullPointerException e){
             return 0;
         }
+    }
+
+    public String  getChats(){
+        JSONArray jsonArray = new JSONArray();
+        Set<String> otherUsers = relOfOther.keySet();
+        for(String otherUser:otherUsers){
+            List<Massage> massageList = relOfOther.get(otherUser);
+            long unread = massageList.stream()
+                                .filter(massage -> massage.getStatus().equals(MassageStatus.UNSEEN))
+                                .count();
+
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("name",otherUser);
+            jsonObject.put("unread_count",unread);
+
+            jsonArray.add(jsonObject);
+        }
+
+        return jsonArray.toString();
     }
 
     @Override

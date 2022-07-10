@@ -46,7 +46,6 @@ public class WorkSpace {
                 clientList.set(i, thisClient);
                 break;
             }
-        /*********/System.out.println(thisClient);
     }
 
     /**
@@ -170,9 +169,7 @@ public class WorkSpace {
             Client otherClient = clientList.stream()
                     .filter(client -> client.getUserName().equals(userOfReceiver))
                     .collect(Collectors.toList()).get(0);
-            /*********/System.out.println(userOfReceiver);
-            /*********/System.out.println(otherClient);
-            /*********/System.out.println(otherClient.status.equals(ClientStatus.ONLINE));
+
             if(otherClient.status.equals(ClientStatus.ONLINE)){
                 otherClient.output.writeUTF("receive-message " + userName +" "+ newJSON);
                 otherClient.output.flush();
@@ -199,5 +196,14 @@ public class WorkSpace {
         }catch (NullPointerException e){
             return false;
         }
+    }
+
+    public void getChats() throws IOException {
+        String res = clientList.stream()
+                            .filter(client -> client.getUserName().equals(userName))
+                            .collect(Collectors.toList()).get(0).getChats();
+
+        output.writeUTF("OK" + res);
+        output.flush();
     }
 }
