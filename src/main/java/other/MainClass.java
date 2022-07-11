@@ -82,6 +82,10 @@ public class MainClass {
                         else if(command.startsWith("OK")){
                             WorkSpace.tmpCommand = command;
                         }
+                        else if(command.equals("shutdown")){
+                            save(finalHost);
+                            System.exit(0);
+                        }
                     } catch (Exception e) {
                         e.getStackTrace();
                     }
