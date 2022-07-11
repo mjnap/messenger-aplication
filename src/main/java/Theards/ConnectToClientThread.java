@@ -1,7 +1,8 @@
 package Theards;
 
-import main.Client;
-import main.WorkSpace;
+
+import other.Client;
+import other.WorkSpace;
 
 import java.io.IOException;
 import java.net.Socket;

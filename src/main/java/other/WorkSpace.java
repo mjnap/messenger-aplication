@@ -1,4 +1,4 @@
-package main;
+package other;
 
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -203,7 +203,7 @@ public class WorkSpace {
                             .filter(client -> client.getUserName().equals(userName))
                             .collect(Collectors.toList()).get(0).getChats();
 
-        output.writeUTF("OK" + res);
+        output.writeUTF("OK " + res);
         output.flush();
     }
 
@@ -214,7 +214,7 @@ public class WorkSpace {
                             .collect(Collectors.toList()).get(0).getMessages(goalUser);
 
 
-        output.writeUTF("OK" + res);
+        output.writeUTF("OK " + res);
         output.flush();
     }
 }

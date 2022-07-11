@@ -1,6 +1,7 @@
 package Theards;
 
-import main.Client;
+
+import other.Client;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

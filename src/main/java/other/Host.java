@@ -1,4 +1,4 @@
-package main;
+package other;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -64,6 +64,7 @@ public class Host {
         }
         catch (Exception e){
             e.printStackTrace();
+            System.exit(0);
         }
     }
 

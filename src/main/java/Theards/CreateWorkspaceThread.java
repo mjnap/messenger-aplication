@@ -1,6 +1,6 @@
 package Theards;
 
-import main.Host;
+import other.Host;
 
 import java.io.IOException;
 

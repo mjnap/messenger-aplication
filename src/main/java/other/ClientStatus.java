@@ -1,4 +1,4 @@
-package main;
+package other;
 
 public enum ClientStatus {
 
