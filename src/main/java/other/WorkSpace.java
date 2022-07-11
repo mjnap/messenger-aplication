@@ -6,11 +6,12 @@ import org.json.simple.JSONValue;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.Socket;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class WorkSpace {
+public class WorkSpace implements Serializable {
 
     private List<Client> clientList;
     protected int port;

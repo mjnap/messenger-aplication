@@ -6,18 +6,19 @@ import org.json.simple.JSONObject;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.Socket;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Client {
+public class Client implements Serializable {
 
     private String userName;
     private String phoneNumber;
     // Map <receiverUser , massages>
     private Map<String, List<Massage>> relOfOther;
-    public DataInputStream input;
-    public DataOutputStream output;
+    public transient DataInputStream input;//todo
+    public transient DataOutputStream output;//todo
     public ClientStatus status;
 
     public Client(String userName, String phoneNumber) {

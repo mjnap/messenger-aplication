@@ -1,23 +1,26 @@
 package other;
 
 import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 
-public class Massage {
+import java.io.Serializable;
 
-    private JSONObject massage;
+public class Massage implements Serializable {
+
+    private String massage;
     private MassageStatus status;
 
     public Massage(JSONObject massage, MassageStatus status) {
-        this.massage = massage;
+        this.massage = massage.toString();
         this.status = status;
     }
 
     public JSONObject getMassage() {
-        return massage;
+        return (JSONObject) JSONValue.parse(massage);
     }
 
     public void setMassage(JSONObject massage) {
-        this.massage = massage;
+        this.massage = massage.toString();
     }
 
     public MassageStatus getStatus() {
@@ -29,6 +32,6 @@ public class Massage {
     }
 }
 
-enum MassageStatus{
+enum MassageStatus implements Serializable{
     SEEN , UNSEEN , SENDER
 }

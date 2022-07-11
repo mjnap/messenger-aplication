@@ -3,18 +3,19 @@ package other;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Host {
+public class Host implements Serializable {
 
     protected String ip;
     private static List<WorkSpace> workSpaceList = new ArrayList<>();
-    private static Socket socket;
-    public static DataInputStream input;
-    public static DataOutputStream output;
+    private static transient Socket socket;
+    public static transient DataInputStream input;
+    public static transient DataOutputStream output;
 
     public Host(String ip) throws IOException {
         this.ip = ip;
@@ -23,6 +24,21 @@ public class Host {
         output = new DataOutputStream(socket.getOutputStream());
     }
     public Host(){}
+
+    public void open() throws IOException {
+        socket = new Socket(ip, 8000);
+        input = new DataInputStream(socket.getInputStream());
+        output = new DataOutputStream(socket.getOutputStream());
+
+        output.writeUTF("connect-again " + ip);
+        output.flush();
+    }
+
+    public void close() throws IOException {
+        socket.close();
+        input.close();
+        output.close();
+    }
 
     public void connection(String command) throws IOException {
 
