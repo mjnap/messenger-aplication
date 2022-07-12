@@ -1,6 +1,5 @@
 package Theards;
 
-
 import other.Client;
 
 import java.io.DataInputStream;

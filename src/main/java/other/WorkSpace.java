@@ -17,7 +17,7 @@ public class WorkSpace implements Serializable {
     protected int port;
     private int creatorClient;
     /**
-     * The user who is connected to this work
+     * The user who is connected to this workspace
      */
     protected String userName;
     private Socket socket;
@@ -155,7 +155,7 @@ public class WorkSpace implements Serializable {
 
             JSONObject newJSON = new JSONObject();
             newJSON.put("seq", thisClient.getSeq(userOfReceiver)+1);
-            newJSON.put("form", userName);
+            newJSON.put("from", userName);
             newJSON.put("type", jsonReceiver.get("type"));
             newJSON.put("body", jsonReceiver.get("body"));
 
@@ -216,6 +216,29 @@ public class WorkSpace implements Serializable {
 
 
         output.writeUTF("OK " + res);
+        output.flush();
+    }
+
+    public void editMessage(String command) throws IOException {
+        String goalUser = command.split(" ")[1];
+        JSONObject infoEdit = (JSONObject) JSONValue.parse("{" + command.split("[{]")[1]);
+
+        long seq = (long) infoEdit.get("seq");
+        String newBody = (String) infoEdit.get("newBody");
+
+
+        // edit message for this user
+        String res = clientList.stream()
+                            .filter(client -> client.getUserName().equals(userName))
+                            .collect(Collectors.toList()).get(0).editMessage(goalUser,seq,newBody,true);
+        if(res.startsWith("OK")){
+            // edit message for goal user
+            clientList.stream()
+                    .filter(client -> client.getUserName().equals(goalUser))
+                    .collect(Collectors.toList()).get(0).editMessage(userName,seq,newBody,false);
+        }
+
+        output.writeUTF(res);
         output.flush();
     }
 }

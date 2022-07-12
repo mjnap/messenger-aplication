@@ -40,6 +40,9 @@ public class ConnectToClientThread extends WorkSpace implements Runnable {
                 else if(command.startsWith("get-messages")){
                     getMessages(command);
                 }
+                else if(command.startsWith("edit-message")){
+                    editMessage(command);
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();

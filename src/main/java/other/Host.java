@@ -25,6 +25,10 @@ public class Host implements Serializable {
     }
     public Host(){}
 
+    /**
+     * open a connection with central server for second time or more
+     * @throws IOException
+     */
     public void open() throws IOException {
         socket = new Socket(ip, 8000);
         input = new DataInputStream(socket.getInputStream());
@@ -40,6 +44,11 @@ public class Host implements Serializable {
         output.close();
     }
 
+    /**
+     * connect to central server for the first time
+     * @param command
+     * @throws IOException
+     */
     public void connection(String command) throws IOException {
 
         try {
@@ -84,6 +93,11 @@ public class Host implements Serializable {
         }
     }
 
+    /**
+     * create a workspace by order central server
+     * @param command
+     * @throws IOException
+     */
     public void createWorkspace(String command) throws IOException {
         int port = Integer.parseInt(command.split(" ")[1]);
         int ipUser = Integer.parseInt(command.split(" ")[2]);

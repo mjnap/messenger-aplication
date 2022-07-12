@@ -19,10 +19,11 @@ public class MainClass {
         Executor executor = Executors.newCachedThreadPool();
         Host host;
 
-        if(isExitsFileData()){
-            host = fetchHost();
+        // if data file was exist, download it to program
+        if(isExistFileData()){
+            host = loadHost();
             host.open();
-            workspaceThreadList = fetchWorkspaces();
+            workspaceThreadList = loadWorkspaces();
             workspaceThreadList.stream().forEach(workspaceThread -> {
                 workspaceThread.setExecutor(executor);
                 executor.execute(workspaceThread);
@@ -43,7 +44,7 @@ public class MainClass {
         }
 
 
-        // thread for get shutdown command
+        // thread for receive shutdown command
         Host finalHost = host;
         new Thread(new Runnable() {
             @Override
@@ -94,6 +95,11 @@ public class MainClass {
         }).start();
     }
 
+    /**
+     * This method save host and workspaceThreadList in data file
+     * @param host
+     * @throws IOException
+     */
     public static void save(Host host) throws IOException {
         File hostDirectory = new File("data");
         if(!hostDirectory.exists())
@@ -115,7 +121,13 @@ public class MainClass {
         objectOutputWorkspace.close();
     }
 
-    public static Host fetchHost() throws IOException, ClassNotFoundException {
+    /**
+     * This method fetch host from data file
+     * @return Host
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+    public static Host loadHost() throws IOException, ClassNotFoundException {
         FileInputStream fileInputHost = new FileInputStream("data/host.txt");
         ObjectInputStream objectInputHost = new ObjectInputStream(fileInputHost);
 
@@ -127,7 +139,13 @@ public class MainClass {
         return host;
     }
 
-    public static List<WorkspaceThread> fetchWorkspaces() throws IOException, ClassNotFoundException {
+    /**
+     * This method fetch workspaceThreadList from data file
+     * @return List
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+    public static List<WorkspaceThread> loadWorkspaces() throws IOException, ClassNotFoundException {
         FileInputStream fileInputWorkspace = new FileInputStream("data/workspaceThreads.txt");
         ObjectInputStream objectInputWorkspace = new ObjectInputStream(fileInputWorkspace);
 
@@ -139,7 +157,7 @@ public class MainClass {
         return workspaceThreads;
     }
 
-    public static boolean isExitsFileData(){
+    public static boolean isExistFileData(){
         return new File("data").exists();
     }
 }
