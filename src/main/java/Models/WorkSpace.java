@@ -1,5 +1,7 @@
-package other;
+package Models;
 
+import lombok.Getter;
+import lombok.experimental.SuperBuilder;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
@@ -11,8 +13,10 @@ import java.net.Socket;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@SuperBuilder
 public class WorkSpace implements Serializable {
 
+    @Getter
     private List<Client> clientList;
     protected int port;
     private int creatorClient;
@@ -56,13 +60,13 @@ public class WorkSpace implements Serializable {
      * @param command
      * @throws IOException
      */
-    public void connectToClient(String command) throws IOException {
+    public void connectToClient(String command, Host host) throws IOException {
         input = new DataInputStream(socket.getInputStream());
         output = new DataOutputStream(socket.getOutputStream());
 
         // send massage to central server for detect client
-        Host.output.writeUTF(command.split(" ")[1]);
-        Host.output.flush();
+        host.output.writeUTF(command.split(" ")[1]);
+        host.output.flush();
 
         // receive massage contain the client from central server
         String detectClient;
@@ -115,7 +119,7 @@ public class WorkSpace implements Serializable {
         }
     }
 
-    private boolean isFirstTime(String phoneNumber){
+    boolean isFirstTime(String phoneNumber){
         boolean check;
         try {
             check = clientList.stream()
@@ -128,7 +132,7 @@ public class WorkSpace implements Serializable {
         return check;
     }
 
-    private boolean checkUserName(String userName){
+    boolean checkUserName(String userName){
         boolean chk;
         try {
             chk = clientList.stream()
@@ -188,7 +192,7 @@ public class WorkSpace implements Serializable {
         }
     }
 
-    private boolean isUserExist(String userName){
+    boolean isUserExist(String userName){
         try{
             boolean check = clientList.stream()
                                     .map(client -> client.getUserName())
@@ -215,7 +219,7 @@ public class WorkSpace implements Serializable {
                             .collect(Collectors.toList()).get(0).getMessages(goalUser);
 
 
-        output.writeUTF("OK " + res);
+        output.writeUTF(res);
         output.flush();
     }
 

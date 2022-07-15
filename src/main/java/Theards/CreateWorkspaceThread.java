@@ -1,21 +1,20 @@
 package Theards;
 
-import other.Host;
+import lombok.AllArgsConstructor;
+import Models.Host;
 
 import java.io.IOException;
 
-public class CreateWorkspaceThread extends Host implements Runnable {
+@AllArgsConstructor
+public class CreateWorkspaceThread implements Runnable {
 
     private String command;
-
-    public CreateWorkspaceThread(String command) {
-        this.command = command;
-    }
+    private Host host;
 
     @Override
     public void run() {
         try {
-            createWorkspace(command);
+            host.createWorkspace(command);
         } catch (IOException e) {
             e.printStackTrace();
         }

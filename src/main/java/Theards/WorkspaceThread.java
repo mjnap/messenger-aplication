@@ -1,9 +1,10 @@
 package Theards;
 
-import other.Client;
+import lombok.Setter;
+import Models.Client;
+import Models.Host;
 
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.ServerSocket;
@@ -15,16 +16,16 @@ import java.util.concurrent.Executor;
 public class WorkspaceThread implements Runnable, Serializable {
 
     private int port;
+    @Setter
     private transient Executor executor;
     private List<Client> clientList = new ArrayList<>();
+    @Setter
+    private Host host;
 
-    public WorkspaceThread(int port, Executor executor) {
+    public WorkspaceThread(int port, Executor executor, Host host) {
         this.port = port;
         this.executor = executor;
-    }
-
-    public void setExecutor(Executor executor) {
-        this.executor = executor;
+        this.host = host;
     }
 
     @Override
@@ -35,11 +36,10 @@ public class WorkspaceThread implements Runnable, Serializable {
             while (true){
                 Socket socket = serverSocket.accept();
                 DataInputStream input = new DataInputStream(socket.getInputStream());
-                DataOutputStream output = new DataOutputStream(socket.getOutputStream());
 
                 String command = input.readUTF();
                 if(command.startsWith("connect")){
-                    executor.execute(new ConnectToClientThread(socket, clientList, command));
+                    executor.execute(new ConnectToClientThread(socket, clientList, command, host));
                 }
             }
         } catch (IOException e) {

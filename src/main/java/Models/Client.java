@@ -1,6 +1,7 @@
-package other;
+package Models;
 
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.ToString;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -13,13 +14,15 @@ import java.net.Socket;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@EqualsAndHashCode
+@EqualsAndHashCode(of = {"userName", "phoneNumber"})
 @ToString(of = {"userName", "phoneNumber"})
 public class Client implements Serializable {
 
+    @Getter
     private String userName;
+    @Getter
     private String phoneNumber;
-    // Map <receiverUser , massages>
+    @Getter
     private Map<String, List<Massage>> relOfOther;
     public transient DataInputStream input;
     public transient DataOutputStream output;
@@ -36,19 +39,6 @@ public class Client implements Serializable {
         output = new DataOutputStream(socket.getOutputStream());
     }
 
-    public String getUserName() {
-        return userName;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    /**
-     * This method save a message with a user name of receiver
-     * @param receiver
-     * @param massage
-     */
     public void saveMassage(String receiver, Massage massage){
         try{
             List<Massage> newList = relOfOther.get(receiver);
@@ -59,9 +49,9 @@ public class Client implements Serializable {
         }
     }
 
-    public int getSeq(String otherClient){
+    public int getSeq(String goalClient){
         try {
-            return relOfOther.get(otherClient).size();
+            return relOfOther.get(goalClient).size();
         }catch (NullPointerException e){
             return 0;
         }
@@ -96,38 +86,42 @@ public class Client implements Serializable {
      * @return
      */
     public String getMessages(String goalUser){
-        JSONArray jsonArray = new JSONArray();
-        List<JSONObject> massageList = relOfOther.get(goalUser).stream()
-                                                        .map(massage -> massage.getMassage())
-                                                        .collect(Collectors.toList());
+        if(relOfOther.containsKey(goalUser)){
+            JSONArray jsonArray = new JSONArray();
+            List<JSONObject> massageList = relOfOther.get(goalUser).stream()
+                    .map(massage -> massage.getMassage())
+                    .collect(Collectors.toList());
 
-        List<Massage> massages = relOfOther.get(goalUser);
-        for(int i=0; i<massages.size(); i++) {
-            Massage massage = massages.get(i);
-            if (massage.getStatus().equals(MassageStatus.UNSEEN)) {
-                massage.setStatus(MassageStatus.SEEN);
-                massages.set(i, massage);
+            List<Massage> massages = relOfOther.get(goalUser);
+            for(int i=0; i<massages.size(); i++) {
+                Massage massage = massages.get(i);
+                if (massage.getStatus().equals(MassageStatus.UNSEEN)) {
+                    massage.setStatus(MassageStatus.SEEN);
+                    massages.set(i, massage);
+                }
             }
+
+            relOfOther.put(goalUser, massages);
+
+            Collections.reverse(massageList);
+            jsonArray.addAll(massageList);
+
+            return "OK " + jsonArray.toString();
         }
 
-        relOfOther.put(goalUser, massages);
-
-        jsonArray.addAll(massageList);
-
-        return jsonArray.toString();
+        return "ERROR you have not interacted with this user before";
     }
 
-    public String editMessage(String goalUser, long seq, String newBody, boolean isSender){
+    public String editMessage(String goalUser, long seq, String newBody, boolean isEditor){
         List<Massage> massageList = relOfOther.get(goalUser);
         JSONObject editedMassage = massageList.stream()
                                         .map(massage -> massage.getMassage())
                                         .filter(massage -> (long) massage.get("seq") == seq)
                                         .collect(Collectors.toList()).get(0);
-
+        editedMassage.put("body",newBody);
         // the user who calls this function must also be the sender of the message
-        if(isSender){
+        if(isEditor){
             if(editedMassage.get("from").toString().equals(userName)){
-                editedMassage.put("body",newBody);
                 for(int i=0; i<massageList.size(); i++){
                     Massage tmpMassage = massageList.get(i);
                     long tmpSeq = (long) tmpMassage.getMassage().get("seq");
@@ -147,7 +141,6 @@ public class Client implements Serializable {
             return "ERROR You are not the sender of this message";
         }
         else {
-            editedMassage.put("body",newBody);
             for(int i=0; i<massageList.size(); i++) {
                 Massage tmpMassage = massageList.get(i);
                 long tmpSeq = (long) tmpMassage.getMassage().get("seq");
@@ -164,4 +157,8 @@ public class Client implements Serializable {
             return "OK edit done";
         }
     }
+}
+
+enum ClientStatus implements Serializable {
+    ONLINE , OFFLINE
 }

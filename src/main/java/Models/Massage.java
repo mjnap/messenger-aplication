@@ -1,5 +1,7 @@
-package other;
+package Models;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
@@ -8,6 +10,7 @@ import java.io.Serializable;
 public class Massage implements Serializable {
 
     private String massage;
+    @Getter @Setter
     private MassageStatus status;
 
     public Massage(JSONObject massage, MassageStatus status) {
@@ -21,14 +24,6 @@ public class Massage implements Serializable {
 
     public void setMassage(JSONObject massage) {
         this.massage = massage.toString();
-    }
-
-    public MassageStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(MassageStatus status) {
-        this.status = status;
     }
 }
 
